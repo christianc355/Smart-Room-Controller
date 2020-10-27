@@ -140,9 +140,10 @@ void loop() {
       pixel.clear();
       pixel.fill(rainbow[rainColor], 0, 1);
       pixel.show();
-      }
-        
+      } 
   }
+
+  if(homeState == homeControl
 
 }
 
@@ -155,6 +156,7 @@ void click1() { //black button press will cycle between functions
   }
 }
 
+//maybe add different fuctionality to click to depending on home state. if home state ==1 click does this 
 void click2() { //encoder button will cycle button state
   if(buttonState == true) { 
     buttonState = false;
