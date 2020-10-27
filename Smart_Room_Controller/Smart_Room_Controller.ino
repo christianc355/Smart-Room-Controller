@@ -203,6 +203,13 @@ void controlHome(){
   pixel.clear();
   pixel.setPixelColor(neoPos, blue);
   pixel.show();
+  
+  display.clearDisplay();
+  display.setTextSize(textSize); //maybe increase text size****
+  display.setTextColor(SSD1306_WHITE);
+  display.setCursor(0,0);
+  display.printf("Home Control");
+  display.display();
 
   if(wemoPos == 0){ //all these if statements added to be able to individually control each wemo individually without interupting the fuction of others
     if(alienState == true){
@@ -325,9 +332,9 @@ void click2() { //encoder button will cycle different states depeding on homeSta
   }
 }
   
-void longPressStart2() { //encoder long press will cycle bulb through colors. 
+void longPressStart2() { 
 
-   if(homeState = lightControl){
+   if(homeState = lightControl){ //encoder long press will cycle through colors. 
      if(rainColor > 6){
        rainColor = 0;
      }
