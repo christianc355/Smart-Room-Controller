@@ -119,6 +119,10 @@ void loop() {
   if(homeState == homeControl){
     controlHome();
   }
+
+  if(homeState == autoWind){
+    sleepTimer();
+  }
   
 }
 
@@ -200,11 +204,11 @@ void controlHome(){
   pixel.setPixelColor(neoPos, blue);
   pixel.show();
 
-  if(wemoPos == 0){
+  if(wemoPos == 0){ //all these if statements added to be able to individually control each wemo individually without interupting the fuction of others
     if(alienState == true){
       wemoClass.switchON(alien);
-//      pixel.clear();//maybe clear is needed here but might ruin neo position
-      pixel.fill(green, 0, 3);
+//      pixel.clear();//maybe clear is needed here but might ruin neo position*******
+      pixel.fill(green, 0, 3); //neopixels will give visual indication of wemo selection and whether it is true
       pixel.show();
     }
     else{
@@ -257,7 +261,9 @@ void controlHome(){
   }
 }
 
-
+void sleepTimer(){
+  //will use timer to slowly turn on and brigthen lights followed by red flashes to act as a wake up alarm. When encoder button is pressed lights and teapot will turn on. 
+}
 
 
 void click1() { //black button press will cycle between functions
@@ -321,13 +327,14 @@ void click2() { //encoder button will cycle different states depeding on homeSta
   
 void longPressStart2() { //encoder long press will cycle bulb through colors. 
 
-   if(homeState = lightControl);
+   if(homeState = lightControl){
      if(rainColor > 6){
        rainColor = 0;
      }
      else{
         rainColor++;
     }
+   }
 }
 
 
