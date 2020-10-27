@@ -40,6 +40,7 @@ int HueBright = 255; //declared immediatly to set initial brightness to 255
 int brightPos; //mapped to encPos to control brightness of hue
 int encPos; //posistion of encoder
 int wemoPos; //posistion of Wemo switch mapped to encoder
+int neoPos; //posistion on neopixel mapped to encoder
 int lightNum [4]; //array for choosing hue light
 int rainColor; //chooses color of rainbow from hue color array
 
@@ -192,38 +193,66 @@ void controlHome(){
   }
 
   myEnc.write(encPos);
-  wemoPos = map(encPos, 0, 95, 0, 3);
+  neoPos = map(encPos, 0, 95, 0, 11);//map neopixel to encoder
+  wemoPos = map(encPos, 0, 95, 0, 3);//map wemo number to encoder
+
+  pixel.clear();
+  pixel.setPixelColor(neoPos, blue);
+  pixel.show();
 
   if(wemoPos == 0){
     if(alienState == true){
       wemoClass.switchON(alien);
+//      pixel.clear();//maybe clear is needed here but might ruin neo position
+      pixel.fill(green, 0, 3);
+      pixel.show();
     }
     else{
       wemoClass.switchOFF(alien);
+      pixel.fill(black, 0, 3);
+      pixel.show();      
     }
   }
   if(wemoPos == 1){
     if(whiteFanState == true){
       wemoClass.switchON(whiteFan);
+//      pixel.clear();
+      pixel.fill(white, 3, 3);
+      pixel.show();      
     }
     else{
       wemoClass.switchOFF(whiteFan);
+      //      pixel.clear();
+      pixel.fill(black, 3, 3);
+      pixel.show();  
     }
   }
   if(wemoPos == 2){
     if(alienState == true){
       wemoClass.switchON(tea);
+//      pixel.clear();
+      pixel.fill(orange, 6, 3);
+      pixel.show();       
     }
     else{
       wemoClass.switchOFF(tea);
+//      pixel.clear();
+      pixel.fill(black, 6, 3);
+      pixel.show();  
     }
   }
   if(wemoPos == 3){
     if(alienState == true){
       wemoClass.switchON(blueFan);
+//      pixel.clear();
+      pixel.fill(red, 9, 3);
+      pixel.show();  
     }
     else{
       wemoClass.switchOFF(blueFan);
+//      pixel.clear();
+      pixel.fill(black, 9, 3);
+      pixel.show();  
     }
   }
 }
