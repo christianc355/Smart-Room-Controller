@@ -92,8 +92,9 @@ button1.setClickTicks(250);
 button1.setPressTicks(2000);
 
 button2.attachClick(click2); //encoder button
+button2.attachLongPressStart(longPressStart2);
 button2.setClickTicks(250);
-button2.setPressTicks(2000);
+button2.setPressTicks(1000);
 
 pinMode (17, OUTPUT); //is this needed?
 
