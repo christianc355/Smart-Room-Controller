@@ -183,7 +183,7 @@ void controlLights(){
     HueOn = buttonState;
     HueColor = HueRainbow[rainColor];
     HueBright = brightPos;
-    setHue(hueOne, HueOn, HueColor, HueBright);//may need to adjust lightNum array or add several setHue
+    setHue(hueOne, HueOn, 5000, HueBright);//may need to adjust lightNum array or add several setHue
     setHue(hueTwo, HueOn, HueColor, HueBright);
 //    setHue(hueThree, HueOn, HueColor, HueBright);
 //    setHue(hueFour, HueOn, HueColor, HueBright);
@@ -239,7 +239,7 @@ void controlHome(){
   if(wemoPos == 0){ //all these if statements added to be able to individually control each wemo individually without interupting the fuction of others
     if(alienState == true){
       wemoClass.switchON(alien);
-//      pixel.clear();//maybe clear is needed here but might ruin neo position*******
+      pixel.clear();//maybe clear is needed here but might ruin neo position*******
       pixel.fill(green, 0, 3); //neopixels will give visual indication of wemo selection and whether it is true
       pixel.show();
     }
