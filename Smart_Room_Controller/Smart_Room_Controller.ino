@@ -17,7 +17,7 @@
 #include "wemo.h" //in lesson code this was in parenthesis
 #include <Encoder.h>
 #include <hue.h>
-#include <Ethernet.h> //included already in wemo.h
+//#include <Ethernet.h> //included already in wemo.h
 
 #define SCREEN_WIDTH 128
 #define SCREEN_HEIGHT 64 //changed for higher resolution
@@ -83,7 +83,7 @@ void setup() {
   
   Serial.begin(9600);
   
-//Ethernet.begin(mac);
+Ethernet.begin(mac);
 
 bme.begin(0x76);
 
