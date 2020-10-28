@@ -78,8 +78,12 @@ wemo wemoClass;
 EthernetClient client;
 
 void setup() {
+  
+  Serial.begin(9600);
+  
+//Ethernet.begin(mac);
 
-Ethernet.begin(mac);
+bme.begin(0x76);
 
 button1.attachClick(click1); //black button
 button1.setClickTicks(250);
@@ -107,7 +111,9 @@ void loop() {
 
   button1.tick();
   button2.tick();
-    
+
+
+    homeState = 0;
   if(homeState == envRead) {
      readEnvironment();
     }
@@ -123,14 +129,15 @@ void loop() {
   if(homeState == autoWind){
     sleepTimer();
   }
-  
+
+  Serial.printf("Temperature: %.2f°F, Pressure: %.2f inHG, Humidity: %.2f Percent\n", temp, pressure, humidity);
 }
 
 
 void readEnvironment(){      //could add functionality to turn lights on and off as well as read environment 
 
     temp = ((bme.readTemperature()*9/5)+32); //reads temp and converts to Fehrenheit
-    pressure = ((bme.readPressure()/100.0)/3386); //reads pressure and converts from pascals to inHG
+    pressure = ((bme.readPressure()/100.0)/33.86); //reads pressure and converts from pascals to inHG
     humidity = bme.readHumidity(); //reads humidity percentage
 
     tempRange = temp;
@@ -343,6 +350,3 @@ void longPressStart2() {
     }
    }
 }
-
-
-//could easily implement long press 1 to cycle language on display 
