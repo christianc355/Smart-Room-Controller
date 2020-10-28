@@ -32,7 +32,8 @@ int wemoOutlet[3]; //array to select wemo outlet
 
 int encButton = 23;
 int blackButton = 22;
-int textSize = 1;
+int textSize = 2;
+int homeTextSize = 3;
 
 bool HueOn;
 int HueColor;
@@ -43,6 +44,7 @@ int wemoPos; //posistion of Wemo switch mapped to encoder
 int neoPos; //posistion on neopixel mapped to encoder
 int lightNum [4]; //array for choosing hue light
 int rainColor; //chooses color of rainbow from hue color array
+bool encRead;
 
 //maybe modify hue.h to add white to rainbow array*******
 
@@ -130,15 +132,10 @@ void loop() {
     sleepTimer();
   }
 
+  encRead = digitalRead(23);
 
   Serial.printf("Temperature: %.2f°F, Pressure: %.2f inHG, Humidity: %.2f Percent\n", temp, pressure, humidity);
-  Serial.printf("Home State: %i", homeState);
-//  display.clearDisplay();
-//  display.setTextSize(1);
-//  display.setTextColor(SSD1306_WHITE);
-//  display.setCursor(0,0);
-//  display.printf("Temperature: %.2f %cF\n Pressure: %.2f inHG\n Humidity: %.2f%c\n", temp, (char)247, pressure, humidity, (char)37);
-//  display.display();
+  Serial.printf("Home State: %i\nEncoder: %i\n ButtonState: %i\n EncRead: %i\n rainColor: %i\n", homeState, encPos, buttonState, encRead, rainColor);
 }
 
 
@@ -160,7 +157,8 @@ void readEnvironment(){      //could add functionality to turn lights on and off
     display.setTextSize(textSize);
     display.setTextColor(SSD1306_WHITE);
     display.setCursor(0,0);
-    display.printf("Temperature: %.2f %cF\n Pressure: %.2f inHG\n Humidity: %.2f%c\n", temp, (char)247, pressure, humidity, (char)37);
+//    display.printf("Temperature: %.2f %cF\n Pressure: %.2f inHG\n Humidity: %.2f%c\n", temp, (char)247, pressure, humidity, (char)37);
+    display.printf("%.2f %cF\n%.2f inHG\n%.2f%c\n", temp, (char)247, pressure, humidity, (char)37);    
     display.display();
 }
 
@@ -195,10 +193,10 @@ void controlLights(){
       } 
 
     display.clearDisplay();
-    display.setTextSize(textSize); //maybe increase text size****
+    display.setTextSize(homeTextSize); //maybe increase text size****
     display.setTextColor(SSD1306_WHITE);
     display.setCursor(0,0);
-    display.printf("Light Control");
+    display.printf("Light\nControl");
     display.display();
 }
 
@@ -220,10 +218,10 @@ void controlHome(){
   pixel.show();
   
   display.clearDisplay();
-  display.setTextSize(textSize); //maybe increase text size****
+  display.setTextSize(homeTextSize); //maybe increase text size****
   display.setTextColor(SSD1306_WHITE);
   display.setCursor(0,0);
-  display.printf("Home Control");
+  display.printf(" Home\nControl");
   display.display();
 
   if(wemoPos == 0){ //all these if statements added to be able to individually control each wemo individually without interupting the fuction of others
@@ -299,7 +297,8 @@ void click1() { //black button press will cycle between functions
 
  
 void click2() { //encoder button will cycle different states depeding on homeState
-  if(homeState == lightControl) { //controls what encoder button will do if within lightControl funcionality
+ Serial.println("*********************");
+  if(homeState = 1) { //controls what encoder button will do if within lightControl funcionality
     if(buttonState == true) { 
       buttonState = false;
     }
