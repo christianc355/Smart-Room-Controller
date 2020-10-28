@@ -42,7 +42,11 @@ int brightPos; //mapped to encPos to control brightness of hue
 int encPos; //posistion of encoder
 int wemoPos; //posistion of Wemo switch mapped to encoder
 int neoPos; //posistion on neopixel mapped to encoder
-int lightNum [4]; //array for choosing hue light
+int hueOne = 1; //variables to choose hue bulb
+int hueTwo = 2;
+int hueThree = 3; 
+int hueFour = 4;
+int hueFive = 5;
 int rainColor; //chooses color of rainbow from hue color array
 bool encRead;
 
@@ -94,7 +98,7 @@ button1.setPressTicks(2000);
 button2.attachClick(click2); //encoder button
 button2.attachLongPressStart(longPressStart2);
 button2.setClickTicks(250);
-button2.setPressTicks(1000);
+button2.setPressTicks(500);
 
 pinMode (17, OUTPUT); //is this needed?
 
@@ -179,9 +183,16 @@ void controlLights(){
     HueOn = buttonState;
     HueColor = HueRainbow[rainColor];
     HueBright = brightPos;
-    setHue(1, HueOn, HueColor, HueBright); //may need to adjust lightNum array or add several setHue
-
-    if(buttonState == true){ //neoPixel will show same color as hue bulb without delay
+    setHue(hueOne, HueOn, HueColor, HueBright);//may need to adjust lightNum array or add several setHue
+    setHue(hueTwo, HueOn, HueColor, HueBright);
+//    setHue(hueThree, HueOn, HueColor, HueBright);
+//    setHue(hueFour, HueOn, HueColor, HueBright);
+//    setHue(hueFive, HueOn, HueColor, HueBright);
+    
+    if(buttonState == true){//neoPixel will show same color as hue bulb without delay
+      if(brightPos < 20){
+        brightPos = 20; //will prevent neoPixels from shutting off completely when hue bulb at lowest brightness
+      }
       pixel.clear();
       pixel.setBrightness(brightPos);//pixel will possibly show same brightness as hue bulb***
       pixel.fill(rainbow[rainColor], 0, 12);
@@ -349,7 +360,7 @@ void click2() { //encoder button will cycle different states depeding on homeSta
 void longPressStart2() { 
 
    if(homeState == lightControl){ //encoder long press will cycle through colors. 
-     if(rainColor > 6){
+     if(rainColor >= 6){
        rainColor = 0;
      }
      else{
