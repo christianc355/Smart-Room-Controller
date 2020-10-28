@@ -17,23 +17,22 @@
 #include "wemo.h" //in lesson code this was in parenthesis
 #include <Encoder.h>
 #include <hue.h>
-//#include <Ethernet.h> //included already in wemo.h
 
 #define SCREEN_WIDTH 128
-#define SCREEN_HEIGHT 64 //changed for higher resolution
+#define SCREEN_HEIGHT 64
 #define OLED_RESET 4
 
 int envRead = 0;
 int lightControl = 1;
 int homeControl = 2;
 int autoWind = 3;
-
-int wemoOutlet[3]; //array to select wemo outlet
+int knockState = 4;
 
 int encButton = 23;
 int blackButton = 22;
 int textSize = 2;
 int homeTextSize = 3;
+int micro; //microphone for door knock automation
 
 bool HueOn;
 int HueColor;
@@ -53,6 +52,7 @@ bool encRead;
 //maybe modify hue.h to add white to rainbow array*******
 
 int homeState; //will cycle between functions of controller
+int lastState; //will save homeState position
 
 float temp;
 float pressure;
@@ -75,25 +75,26 @@ bool blueFanState;
 OneButton button1(blackButton, false, false); //may need to change false true since button code is borrowed from encoder lesson****
 OneButton button2(encButton, false, false);
 Adafruit_BME280 bme;
-Adafruit_NeoPixel pixel(12, 17, NEO_GRB + NEO_KHZ800);
+Adafruit_NeoPixel pixel(14, 17, NEO_GRB + NEO_KHZ800);
 Adafruit_SSD1306 display(SCREEN_WIDTH, SCREEN_HEIGHT, &Wire, OLED_RESET);
 Encoder myEnc(2,3);
 
-wemo wemoClass;
+//wemo wemoClass;
 
 EthernetClient client;
 
 void setup() {
   
-  Serial.begin(9600);
+Serial.begin(9600);
   
 Ethernet.begin(mac);
 
 bme.begin(0x76);
 
 button1.attachClick(click1); //black button
+button1.attachLongPressStart(longPressStart1);
 button1.setClickTicks(250);
-button1.setPressTicks(2000);
+button1.setPressTicks(1000);
 
 button2.attachClick(click2); //encoder button
 button2.attachLongPressStart(longPressStart2);
@@ -101,6 +102,7 @@ button2.setClickTicks(250);
 button2.setPressTicks(500);
 
 pinMode (17, OUTPUT); //is this needed?
+pinMode (A7, INPUT); //microphone
 
 pixel.begin();
 pixel.show();
@@ -118,6 +120,8 @@ void loop() {
 
   button1.tick();
   button2.tick();
+
+  digitalWrite(6,LOW);
 
 
 
@@ -137,10 +141,21 @@ void loop() {
     sleepTimer();
   }
 
+  micro = analogRead(A7);
+  if(micro > 1000){
+    homeState = 4;
+  }
+  if(homeState == knockState){
+    doorKnock();
+    delay(4000);
+    homeState = lastState;
+  }
+
   encRead = digitalRead(23);
 
   Serial.printf("Temperature: %.2f°F, Pressure: %.2f inHG, Humidity: %.2f Percent\n", temp, pressure, humidity);
-  Serial.printf("Home State: %i\nEncoder: %i\n ButtonState: %i\n EncRead: %i\n rainColor: %i\n", homeState, encPos, buttonState, encRead, rainColor);
+  Serial.printf("Home State: %i Encoder: %i ButtonState: %i rainColor: %i micro: %i\n", homeState, encPos, buttonState, rainColor, micro);
+  Serial.printf("Wemo Position: %i, Alien: %i, White Fan; %i, Tea: %i, Blue Fan: %i\n", wemoPos, alienState, whiteFanState, teaState, blueFanState);
 }
 
 
@@ -155,7 +170,7 @@ void readEnvironment(){      //could add functionality to turn lights on and off
 
     pixel.clear();
     pixel.fill(red, 0, neoRange);
-    pixel.fill(blue, neoRange, 12);
+    pixel.fill(blue, neoRange, 11);
     pixel.show();
 
     display.clearDisplay();
@@ -183,8 +198,8 @@ void controlLights(){
     HueOn = buttonState;
     HueColor = HueRainbow[rainColor];
     HueBright = brightPos;
-    setHue(hueOne, HueOn, 5000, HueBright);//may need to adjust lightNum array or add several setHue
-    setHue(hueTwo, HueOn, HueColor, HueBright);
+//    setHue(hueOne, HueOn, HueColor, HueBright);//may need to adjust lightNum array or add several setHue
+//    setHue(hueTwo, HueOn, HueColor, HueBright);
 //    setHue(hueThree, HueOn, HueColor, HueBright);
 //    setHue(hueFour, HueOn, HueColor, HueBright);
 //    setHue(hueFive, HueOn, HueColor, HueBright);
@@ -199,8 +214,14 @@ void controlLights(){
       pixel.show();
       }
       else {
+        if(brightPos < 20){
+          brightPos = 20;
+        }
       pixel.clear();
-      pixel.fill(rainbow[rainColor], 0, 1);
+      pixel.setBrightness(brightPos);
+      pixel.fill(rainbow[rainColor], 0, 2);
+      pixel.fill(rainbow[rainColor], 4, 2);
+      pixel.fill(rainbow[rainColor], 8, 2);
       pixel.show();
       } 
 
@@ -222,10 +243,10 @@ void controlHome(){
   }
 
   myEnc.write(encPos);
-  neoPos = map(encPos, 0, 95, 0, 11);//map neopixel to encoder
+  neoPos = map(encPos, 0, 95, 0, 13);//map neopixel to encoder
   wemoPos = map(encPos, 0, 95, 0, 3);//map wemo number to encoder
 
-  pixel.clear();
+//  pixel.clear();
   pixel.setPixelColor(neoPos, blue);
   pixel.show();
   
@@ -233,61 +254,55 @@ void controlHome(){
   display.setTextSize(homeTextSize); //maybe increase text size****
   display.setTextColor(SSD1306_WHITE);
   display.setCursor(0,0);
-  display.printf(" Home\nControl");
+  display.printf("Home\nControl");
   display.display();
 
   if(wemoPos == 0){ //all these if statements added to be able to individually control each wemo individually without interupting the fuction of others
     if(alienState == true){
-      wemoClass.switchON(alien);
-      pixel.clear();//maybe clear is needed here but might ruin neo position*******
-      pixel.fill(green, 0, 3); //neopixels will give visual indication of wemo selection and whether it is true
+//      wemoClass.switchON(alien);
+      pixel.fill(turquoise, 0, 3); //neopixels will give visual indication of wemo selection and whether it is true
       pixel.show();
     }
     else{
-      wemoClass.switchOFF(alien);
-      pixel.fill(black, 0, 3);
+//      wemoClass.switchOFF(alien);
+      pixel.fill(navy, 0, 3);
+//      pixel.setPixelColor(neoPos, blue);
       pixel.show();      
     }
   }
   if(wemoPos == 1){
     if(whiteFanState == true){
-      wemoClass.switchON(whiteFan);
-//      pixel.clear();
-      pixel.fill(white, 3, 3);
+ //     wemoClass.switchON(whiteFan);
+      pixel.fill(indigo, 3, 3);
       pixel.show();      
     }
     else{
-      wemoClass.switchOFF(whiteFan);
-      //      pixel.clear();
-      pixel.fill(black, 3, 3);
+//      wemoClass.switchOFF(whiteFan);
+      pixel.fill(silver, 3, 3);
       pixel.show();  
     }
   }
   if(wemoPos == 2){
-    if(alienState == true){
-      wemoClass.switchON(tea);
-//      pixel.clear();
+    if(teaState == true){
+//      wemoClass.switchON(tea);
       pixel.fill(orange, 6, 3);
       pixel.show();       
     }
     else{
-      wemoClass.switchOFF(tea);
-//      pixel.clear();
+//      wemoClass.switchOFF(tea);
       pixel.fill(black, 6, 3);
       pixel.show();  
     }
   }
   if(wemoPos == 3){
-    if(alienState == true){
-      wemoClass.switchON(blueFan);
-//      pixel.clear();
+    if(blueFanState == true){
+ //     wemoClass.switchON(blueFan);
       pixel.fill(red, 9, 3);
       pixel.show();  
     }
     else{
-      wemoClass.switchOFF(blueFan);
-//      pixel.clear();
-      pixel.fill(black, 9, 3);
+ //     wemoClass.switchOFF(blueFan);
+      pixel.fill(turquoise, 9, 3);
       pixel.show();  
     }
   }
@@ -297,6 +312,32 @@ void sleepTimer(){
   //will use timer to slowly turn on and brigthen lights followed by red flashes to act as a wake up alarm. When encoder button is pressed lights and teapot will turn on. 
 }
 
+void lightsOn(){
+      pixel.clear();
+      pixel.setBrightness(brightPos);
+      pixel.fill(rainbow[rainColor], 0, 2);
+      pixel.fill(rainbow[rainColor], 4, 2);
+      pixel.fill(rainbow[rainColor], 8, 2);
+      pixel.show();
+}
+
+void doorKnock(){
+
+    display.clearDisplay();
+    display.setTextSize(textSize);
+    display.setTextColor(SSD1306_WHITE);
+    display.setCursor(0,0);
+    display.printf("Door Knock");    
+    display.display();
+  
+    pixel.clear();
+    pixel.fill(red, 0, 12);
+    delay(500);
+    pixel.fill(white, 0, 12);
+    pixel.show();
+
+  
+}
 
 void click1() { //black button press will cycle between functions
   if(homeState >= 3){
@@ -305,6 +346,18 @@ void click1() { //black button press will cycle between functions
   else {
     homeState++;
   }
+  if(lastState >= 3){
+    lastState = 0;
+  }
+  else {
+    lastState++;
+  }
+  
+}
+
+void longPressStart1() { 
+
+
 }
 
  
