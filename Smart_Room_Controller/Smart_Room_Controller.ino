@@ -113,7 +113,7 @@ void loop() {
   button2.tick();
 
 
-    homeState = 0;
+    homeState = envRead;
   if(homeState == envRead) {
      readEnvironment();
     }
@@ -130,7 +130,15 @@ void loop() {
     sleepTimer();
   }
 
+
   Serial.printf("Temperature: %.2f°F, Pressure: %.2f inHG, Humidity: %.2f Percent\n", temp, pressure, humidity);
+  Serial.printf("Home State: %i", homeState);
+//  display.clearDisplay();
+//  display.setTextSize(1);
+//  display.setTextColor(SSD1306_WHITE);
+//  display.setCursor(0,0);
+//  display.printf("Temperature: %.2f %cF\n Pressure: %.2f inHG\n Humidity: %.2f%c\n", temp, (char)247, pressure, humidity, (char)37);
+//  display.display();
 }
 
 
@@ -152,7 +160,7 @@ void readEnvironment(){      //could add functionality to turn lights on and off
     display.setTextSize(textSize);
     display.setTextColor(SSD1306_WHITE);
     display.setCursor(0,0);
-    display.printf("Temperature: %.2f %cF\n Pressure: %2f inHG\n Humidity: %.2f%c\n", temp, (char)247, pressure, humidity, (char)37);
+    display.printf("Temperature: %.2f %cF\n Pressure: %.2f inHG\n Humidity: %.2f%c\n", temp, (char)247, pressure, humidity, (char)37);
     display.display();
 }
 
