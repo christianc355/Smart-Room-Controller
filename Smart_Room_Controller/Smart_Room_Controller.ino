@@ -17,7 +17,7 @@
 #include "wemo.h" //in lesson code this was in parenthesis
 #include <Encoder.h>
 #include <hue.h>
-//#include <Ethernet.h> //included already in wemo.h
+#include <Ethernet.h> //included already in wemo.h
 
 #define SCREEN_WIDTH 128
 #define SCREEN_HEIGHT 64 //changed for higher resolution
@@ -179,7 +179,7 @@ void controlLights(){
     HueOn = buttonState;
     HueColor = HueRainbow[rainColor];
     HueBright = brightPos;
-    setHue(lightNum[4], HueOn, HueColor, HueBright); //may need to adjust lightNum array or add several setHue
+    setHue(1, HueOn, HueColor, HueBright); //may need to adjust lightNum array or add several setHue
 
     if(buttonState == true){ //neoPixel will show same color as hue bulb without delay
       pixel.clear();
@@ -288,7 +288,7 @@ void sleepTimer(){
 
 
 void click1() { //black button press will cycle between functions
-  if(homeState > 3){
+  if(homeState >= 3){
     homeState = 0;
   }
   else {
@@ -298,8 +298,7 @@ void click1() { //black button press will cycle between functions
 
  
 void click2() { //encoder button will cycle different states depeding on homeState
- Serial.println("*********************");
-  if(homeState = 1) { //controls what encoder button will do if within lightControl funcionality
+  if(homeState == 1) { //controls what encoder button will do if within lightControl funcionality
     if(buttonState == true) { 
       buttonState = false;
     }
@@ -349,7 +348,7 @@ void click2() { //encoder button will cycle different states depeding on homeSta
   
 void longPressStart2() { 
 
-   if(homeState = lightControl){ //encoder long press will cycle through colors. 
+   if(homeState == lightControl){ //encoder long press will cycle through colors. 
      if(rainColor > 6){
        rainColor = 0;
      }
