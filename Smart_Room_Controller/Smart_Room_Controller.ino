@@ -71,7 +71,7 @@ OneButton button2(encButton, false, false);
 Adafruit_BME280 bme;
 Adafruit_NeoPixel pixel(12, 17, NEO_GRB + NEO_KHZ800);
 Adafruit_SSD1306 display(SCREEN_WIDTH, SCREEN_HEIGHT, &Wire, OLED_RESET);
-Encoder myEnc(3,2);
+Encoder myEnc(2,3);
 
 wemo wemoClass;
 
@@ -113,7 +113,7 @@ void loop() {
   button2.tick();
 
 
-    homeState = envRead;
+
   if(homeState == envRead) {
      readEnvironment();
     }
