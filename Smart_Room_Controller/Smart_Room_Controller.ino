@@ -90,13 +90,13 @@ Encoder myEnc(2,3);
 
 wemo wemoClass;
 
-EthernetClient client;
+//EthernetClient client;
 
 void setup() {
   
 Serial.begin(9600);
   
-Ethernet.begin(mac);
+//Ethernet.begin(mac);
 
 bme.begin(0x76);
 
@@ -130,7 +130,7 @@ void loop() {
   button1.tick();
   button2.tick();
 
-  digitalWrite(6,LOW);//maybe delete*********
+  digitalWrite(6,LOW);//maybe delete*********goes to encoder light 
 
   if(homeState == envRead) {
      readEnvironment();
@@ -176,7 +176,7 @@ void readEnvironment(){      //could add functionality to turn lights on and off
     humidity = bme.readHumidity(); //reads humidity percentage
 
     tempRange = temp;
-    neoRange = map(tempRange, 65, 80, 0, 11);
+    neoRange = map(tempRange, 60, 80, 0, 11);
 
     pixel.clear();
     pixel.fill(red, 0, neoRange);
@@ -277,35 +277,53 @@ void controlHome(){
   neoPos = map(encPos, 0, 95, 0, 11);//map neopixel to encoder
   wemoPos = map(encPos, 0, 95, 0, 3);//map wemo number to encoder
 
-  pixel.clear();
-  pixel.setPixelColor(neoPos, blue);
-  pixel.show();
+//  pixel.clear();
+//  pixel.setPixelColor(neoPos, blue);
+//  pixel.show();
 
   
-  display.clearDisplay();
-  display.setTextSize(homeTextSize); //maybe increase text size****
+//  display.clearDisplay();
+  display.setTextSize(2);
   display.setTextColor(SSD1306_WHITE);
   display.setCursor(0,0);
-  display.printf("Home\nControl");
-  display.display();
+//  display.printf("Home\nControl");
+//  display.display();
+  pixel.clear();
 
   if(wemoPos == 0){ //all these if statements added to be able to individually control each wemo individually without interupting the fuction of others
+    display.clearDisplay();
+    display.printf("Alien<\nTea\nWhite Fan\nBlue Fan\n");
+    display.display();
     if(alienState == true){
-//      wemoClass.switchON(alien);
+      wemoClass.switchON(alien);
+        pixel.fill(green, 0, 4);
+        pixel.show();
     }
     else{
-//      wemoClass.switchOFF(alien); 
+      wemoClass.switchOFF(alien); 
+        pixel.fill(white, 0, 4);
+        pixel.show();
     }
   }
   if(wemoPos == 1){
+    display.clearDisplay();
+    display.printf("Alien\nTea<\nWhite Fan\nBlue Fan\n");
+    display.display();
     if(whiteFanState == true){
- //     wemoClass.switchON(whiteFan);   
+ //     wemoClass.switchON(whiteFan);
+        pixel.fill(carrot, 4, 4);
+        pixel.show();   
     }
     else{
 //      wemoClass.switchOFF(whiteFan); 
+        pixel.fill(white, 4, 4);
+        pixel.show();
     }
   }
   if(wemoPos == 2){
+    display.clearDisplay();
+    display.printf("Alien\nTea\nWhite Fan<\nBlue Fan\n");
+    display.display();
     if(teaState == true){
 //      wemoClass.switchON(tea);       
     }
@@ -314,6 +332,9 @@ void controlHome(){
     }
   }
   if(wemoPos == 3){
+    display.clearDisplay();
+    display.printf("Alien\nTea\nWhite Fan\nBlue Fan<\n");
+    display.display();
     if(blueFanState == true){
  //     wemoClass.switchON(blueFan);  
     }
