@@ -129,9 +129,7 @@ void loop() {
   button1.tick();
   button2.tick();
 
-  digitalWrite(6,LOW);
-
-
+  digitalWrite(6,LOW);//maybe delete*********
 
   if(homeState == envRead) {
      readEnvironment();
@@ -150,13 +148,16 @@ void loop() {
   }
 
   micro = analogRead(A7);
+  currentTime = millis();
   if(micro > 1000){
     homeState = 4;
   }
   if(homeState == knockState){
     doorKnock();
-//    delay(9000);
+    if((currentTime-lastSecond)>10000) {
     homeState = lastState;
+    lastSecond = millis();
+    }
   }
 
   encRead = digitalRead(23);
@@ -303,14 +304,7 @@ void controlHome(){
 void sleepTimer(){ 
 
     currentTime = millis();
-    Serial.printf("Timer On: %i\n", timerOn);
-    
-//    display.clearDisplay();
-//    display.setTextSize(homeTextSize);
-//    display.setTextColor(SSD1306_WHITE);
-//    display.setCursor(0,0);
-//    display.printf("Wake Up\nAlarm");
-//    display.display();
+//    Serial.printf("Timer On: %i\n", timerOn);
 
     if(timerOn == true){
     display.clearDisplay();
@@ -319,27 +313,23 @@ void sleepTimer(){
     display.setCursor(0,0);
     display.printf("Alarm\n ON+");
     display.display();
-//    pixel.clear();
-//    pixel.setBrightness(20);
-//    pixel.fill(turquoise, 0, 12);
-//    pixel.show();
       if(millis()-lastTime >= wakeTimer){
         Serial.printf("Wake up is ready\n");
        if((currentTime-lastSecond)>500) {
         Serial.print("Flash\n");
         pixel.clear();
-        pixel.fill(blue, 0, 12);
+        pixel.fill(navy, 0, 12);
         pixel.show();
         lastSecond = millis();
        }
          if((currentTime-lastMinute)>1000) {
           Serial.println("Ding\n");
           pixel.clear();
-          pixel.fill(red, 0, 12);
+          pixel.fill(silver, 0, 12);
           pixel.show();
           lastMinute = millis();
       }
-      }
+     }
       else{
         Serial.printf("Not wake up\n");
       }
@@ -389,7 +379,8 @@ void doorKnock(){
 //  setHue(hueThree, HueOn, HueColor, HueBright);
   setHue(hueFour, HueOn, HueColor, HueBright);
 //  setHue(hueFive, HueOn, HueColor, HueBright);
-  delay(10000);
+
+  
   
 }
 
