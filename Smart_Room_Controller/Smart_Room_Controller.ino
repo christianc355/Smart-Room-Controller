@@ -39,6 +39,7 @@ unsigned int wakeTimer = 5000;
 unsigned int currentTime;
 unsigned int lastSecond;
 unsigned int lastMinute;
+unsigned int knockSecond;
 
 bool HueOn;
 int HueColor;
@@ -87,15 +88,15 @@ Adafruit_NeoPixel pixel(14, 17, NEO_GRB + NEO_KHZ800);
 Adafruit_SSD1306 display(SCREEN_WIDTH, SCREEN_HEIGHT, &Wire, OLED_RESET);
 Encoder myEnc(2,3);
 
-//wemo wemoClass;
+wemo wemoClass;
 
-//EthernetClient client;
+EthernetClient client;
 
 void setup() {
   
 Serial.begin(9600);
   
-//Ethernet.begin(mac);
+Ethernet.begin(mac);
 
 bme.begin(0x76);
 
@@ -154,7 +155,7 @@ void loop() {
   }
   if(homeState == knockState){
     doorKnock();
-    if((currentTime-lastSecond)>10000) {
+    if((currentTime-lastSecond)>15000) {
     homeState = lastState;
     lastSecond = millis();
     }
@@ -204,15 +205,6 @@ void controlLights(){
     myEnc.write(encPos);
     brightPos = map(encPos, 0, 95, 0, 255);
     
-    HueOn = buttonState;
-    HueColor = HueRainbow[rainColor];
-    HueBright = brightPos;
-    setHue(hueOne, HueOn, HueColor, HueBright);//may need to adjust lightNum arr
-    setHue(hueTwo, HueOn, HueColor, HueBright);
-    setHue(hueThree, HueOn, HueColor, HueBright);
-    setHue(hueFour, HueOn, HueColor, HueBright);
-    setHue(hueFive, HueOn, HueColor, HueBright);
-    
     if(buttonState == true){//neoPixel will show same color as hue bulb without delay
       if(brightPos < 20){
         brightPos = 20; //will prevent neoPixels from shutting off completely when hue bulb at lowest brightness
@@ -233,6 +225,36 @@ void controlLights(){
       pixel.fill(rainbow[rainColor], 8, 2);
       pixel.show();
       } 
+    
+    HueOn = buttonState;
+    HueColor = HueRainbow[rainColor];
+    HueBright = brightPos;
+    setHue(hueOne, HueOn, HueColor, HueBright);//may need to adjust lightNum arr
+//    setHue(hueTwo, HueOn, HueColor, HueBright);
+//    setHue(hueThree, HueOn, HueColor, HueBright);
+//    setHue(hueFour, HueOn, HueColor, HueBright);
+//    setHue(hueFive, HueOn, HueColor, HueBright);
+    
+//    if(buttonState == true){//neoPixel will show same color as hue bulb without delay
+//      if(brightPos < 20){
+//        brightPos = 20; //will prevent neoPixels from shutting off completely when hue bulb at lowest brightness
+//      }
+//      pixel.clear();
+//      pixel.setBrightness(brightPos);//pixel will possibly show same brightness as hue bulb***
+//      pixel.fill(rainbow[rainColor], 0, 12);
+//      pixel.show();
+//      }
+//      else {
+//        if(brightPos < 20){
+//          brightPos = 20;
+//        }
+//      pixel.clear();
+//      pixel.setBrightness(brightPos);
+//      pixel.fill(rainbow[rainColor], 0, 2);
+//      pixel.fill(rainbow[rainColor], 4, 2);
+//      pixel.fill(rainbow[rainColor], 8, 2);
+//      pixel.show();
+//      } 
 
     display.clearDisplay();
     display.setTextSize(homeTextSize); //maybe increase text size****
@@ -317,15 +339,23 @@ void sleepTimer(){
         Serial.printf("Wake up is ready\n");
        if((currentTime-lastSecond)>500) {
         Serial.print("Flash\n");
+        HueColor = HueOrange;
+        HueBright = 255;
+        HueOn = true;
+        setHue(hueOne, HueOn, HueColor, HueBright);
         pixel.clear();
-        pixel.fill(navy, 0, 12);
+        pixel.fill(orange, 0, 12);
         pixel.show();
         lastSecond = millis();
        }
          if((currentTime-lastMinute)>1000) {
           Serial.println("Ding\n");
+          HueColor = HueBlue;
+          HueBright = 255;
+          HueOn = true;
+          setHue(hueOne, HueOn, HueColor, HueBright);
           pixel.clear();
-          pixel.fill(silver, 0, 12);
+          pixel.fill(blue, 0, 12);
           pixel.show();
           lastMinute = millis();
       }
@@ -360,28 +390,38 @@ void lightsOn(){
 void doorKnock(){
 
     display.clearDisplay();
-    display.setTextSize(textSize);
+    display.setTextSize(4);
     display.setTextColor(SSD1306_WHITE);
-    display.setCursor(0,0);
-    display.printf("Door Knock");    
+    display.setCursor(15,0);
+    display.printf("Door\nKnock");    
     display.display();
   
     pixel.clear();
     pixel.fill(red, 0, 12);
     pixel.fill(white, 0, 12);
     pixel.show();
-        
+
     HueOn = true; //paramaters set here for door knock function
-    HueColor = HueRed;
-    HueBright = 255;
-  setHue(hueOne, HueOn, HueColor, HueBright);//maybe only use hue 
+
+    if((currentTime-knockSecond)>1000) {
+      HueColor = HueRed;
+      HueBright = 255;
+      setHue(hueOne, HueOn, HueColor, HueBright);
+      knockSecond = millis();
+    }
+    if((currentTime-knockSecond)>3000) {
+      HueColor = HueBlue;
+      HueBright = 255;
+      setHue(hueOne, HueOn, HueColor, HueBright);
+      knockSecond = millis();
+    }       
+    
+//maybe only use one hue 
 //  setHue(hueTwo, HueOn, HueColor, HueBright);
 //  setHue(hueThree, HueOn, HueColor, HueBright);
-  setHue(hueFour, HueOn, HueColor, HueBright);
+//  setHue(hueFour, HueOn, HueColor, HueBright);
 //  setHue(hueFive, HueOn, HueColor, HueBright);
 
-  
-  
 }
 
 void click1() { //black button press will cycle between functions
