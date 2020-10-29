@@ -66,6 +66,7 @@ float pressure;
 float humidity;
 float tempRange;
 int neoRange;
+int displayBright;
 
 const int alien = 0; //numbers relate to wemo outlets
 const int whiteFan = 1;
@@ -234,34 +235,22 @@ void controlLights(){
 //    setHue(hueThree, HueOn, HueColor, HueBright);
 //    setHue(hueFour, HueOn, HueColor, HueBright);
 //    setHue(hueFive, HueOn, HueColor, HueBright);
-    
-//    if(buttonState == true){//neoPixel will show same color as hue bulb without delay
-//      if(brightPos < 20){
-//        brightPos = 20; //will prevent neoPixels from shutting off completely when hue bulb at lowest brightness
-//      }
-//      pixel.clear();
-//      pixel.setBrightness(brightPos);//pixel will possibly show same brightness as hue bulb***
-//      pixel.fill(rainbow[rainColor], 0, 12);
-//      pixel.show();
-//      }
-//      else {
-//        if(brightPos < 20){
-//          brightPos = 20;
-//        }
-//      pixel.clear();
-//      pixel.setBrightness(brightPos);
-//      pixel.fill(rainbow[rainColor], 0, 2);
-//      pixel.fill(rainbow[rainColor], 4, 2);
-//      pixel.fill(rainbow[rainColor], 8, 2);
-//      pixel.show();
-//      } 
 
-    display.clearDisplay();
-    display.setTextSize(homeTextSize); //maybe increase text size****
+    displayBright = map(HueBright, 0, 255, 0, 100); //will display brightness as a percentage on display
+
+    display.setTextSize(2); //maybe increase text size****
     display.setTextColor(SSD1306_WHITE);
     display.setCursor(0,0);
-    display.printf("Light\nControl");
+    if(buttonState == true){
+    display.clearDisplay();
+    display.printf(" -Lights-\nLumen:%i%c\nHue: ON", displayBright,(char)37);
+    display.display();      
+    }
+    else{
+    display.clearDisplay();
+    display.printf(" -Lights-\nLumen:%i%c\nHue: OFF", displayBright,(char)37);
     display.display();
+    }
 }
 
 void controlHome(){
