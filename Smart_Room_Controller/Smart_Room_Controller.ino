@@ -36,6 +36,9 @@ int micro; //microphone for door knock automation
 
 unsigned int lastTime = 0;
 unsigned int wakeTimer = 5000;
+unsigned int currentTime;
+unsigned int lastSecond;
+unsigned int lastMinute;
 
 bool HueOn;
 int HueColor;
@@ -158,9 +161,9 @@ void loop() {
 
   encRead = digitalRead(23);
 
-  Serial.printf("Temperature: %.2f°F, Pressure: %.2f inHG, Humidity: %.2f Percent\n", temp, pressure, humidity);
-  Serial.printf("Home State: %i Encoder: %i ButtonState: %i rainColor: %i micro: %i\n", homeState, encPos, buttonState, rainColor, micro);
-  Serial.printf("Wemo Position: %i, Alien: %i, White Fan; %i, Tea: %i, Blue Fan: %i\n", wemoPos, alienState, whiteFanState, teaState, blueFanState);
+//  Serial.printf("Temperature: %.2f°F, Pressure: %.2f inHG, Humidity: %.2f Percent\n", temp, pressure, humidity);
+//  Serial.printf("Home State: %i Encoder: %i ButtonState: %i rainColor: %i micro: %i\n", homeState, encPos, buttonState, rainColor, micro);
+//  Serial.printf("Wemo Position: %i, Alien: %i, White Fan; %i, Tea: %i, Blue Fan: %i\n", wemoPos, alienState, whiteFanState, teaState, blueFanState);
 }
 
 
@@ -298,28 +301,61 @@ void controlHome(){
 }
 
 void sleepTimer(){ 
-   
-    display.clearDisplay();
-    display.setTextSize(homeTextSize); //maybe increase text size****
-    display.setTextColor(SSD1306_WHITE);
-    display.setCursor(0,0);
-    display.printf("Wake Up\nAlarm");
-    display.display();
+
+    currentTime = millis();
+    Serial.printf("Timer On: %i\n", timerOn);
+    
+//    display.clearDisplay();
+//    display.setTextSize(homeTextSize);
+//    display.setTextColor(SSD1306_WHITE);
+//    display.setCursor(0,0);
+//    display.printf("Wake Up\nAlarm");
+//    display.display();
 
     if(timerOn == true){
+    display.clearDisplay();
+    display.setTextSize(4);
+    display.setTextColor(SSD1306_WHITE);
+    display.setCursor(0,0);
+    display.printf("Alarm\n ON+");
+    display.display();
+//    pixel.clear();
+//    pixel.setBrightness(20);
+//    pixel.fill(turquoise, 0, 12);
+//    pixel.show();
       if(millis()-lastTime >= wakeTimer){
         Serial.printf("Wake up is ready\n");
+       if((currentTime-lastSecond)>500) {
+        Serial.print("Flash\n");
+        pixel.clear();
+        pixel.fill(blue, 0, 12);
+        pixel.show();
+        lastSecond = millis();
+       }
+         if((currentTime-lastMinute)>1000) {
+          Serial.println("Ding\n");
+          pixel.clear();
+          pixel.fill(red, 0, 12);
+          pixel.show();
+          lastMinute = millis();
+      }
       }
       else{
         Serial.printf("Not wake up\n");
       }
     }
     else{
-      
-    }
-  Serial.printf("TimerOn: %i",timerOn);
-
-  
+    display.clearDisplay();
+    display.setTextSize(4);
+    display.setTextColor(SSD1306_WHITE);
+    display.setCursor(0,0);
+    display.printf("Alarm\n OFF-");
+    display.display();
+    pixel.clear();
+    pixel.setBrightness(20);
+    pixel.fill(turquoise, 0, 12);
+    pixel.show();
+     }
 }
 
 void lightsOn(){
