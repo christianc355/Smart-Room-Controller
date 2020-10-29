@@ -231,10 +231,10 @@ void controlLights(){
     HueColor = HueRainbow[rainColor];
     HueBright = brightPos;
     setHue(hueOne, HueOn, HueColor, HueBright);//may need to adjust lightNum arr
-//    setHue(hueTwo, HueOn, HueColor, HueBright);
-//    setHue(hueThree, HueOn, HueColor, HueBright);
-//    setHue(hueFour, HueOn, HueColor, HueBright);
-//    setHue(hueFive, HueOn, HueColor, HueBright);
+    setHue(hueTwo, HueOn, HueColor, HueBright);
+    setHue(hueThree, HueOn, HueColor, HueBright);
+    setHue(hueFour, HueOn, HueColor, HueBright);
+    setHue(hueFive, HueOn, HueColor, HueBright);
 
     displayBright = map(HueBright, 0, 255, 0, 100); //will display brightness as a percentage on display
 
@@ -254,6 +254,7 @@ void controlLights(){
 }
 
 void controlHome(){
+  
   encPos = myEnc.read();
   if(encPos > 95){
     encPos = 95;
@@ -266,31 +267,24 @@ void controlHome(){
   neoPos = map(encPos, 0, 95, 0, 11);//map neopixel to encoder
   wemoPos = map(encPos, 0, 95, 0, 3);//map wemo number to encoder
 
-//  pixel.clear();
-//  pixel.setPixelColor(neoPos, blue);
-//  pixel.show();
-
-  
-//  display.clearDisplay();
   display.setTextSize(2);
   display.setTextColor(SSD1306_WHITE);
   display.setCursor(0,0);
-//  display.printf("Home\nControl");
-//  display.display();
-  pixel.clear();
+
+  pixel.setBrightness(20);
 
   if(wemoPos == 0){ //all these if statements added to be able to individually control each wemo individually without interupting the fuction of others
     display.clearDisplay();
     display.printf("Alien<\nTea\nWhite Fan\nBlue Fan\n");
     display.display();
     if(alienState == true){
-      wemoClass.switchON(alien);
-        pixel.fill(green, 0, 4);
+ //     wemoClass.switchON(alien);
+        pixel.fill(green, 0, 3);
         pixel.show();
     }
     else{
-      wemoClass.switchOFF(alien); 
-        pixel.fill(white, 0, 4);
+  //    wemoClass.switchOFF(alien);
+        pixel.fill(black, 0, 3);
         pixel.show();
     }
   }
@@ -300,12 +294,12 @@ void controlHome(){
     display.display();
     if(whiteFanState == true){
  //     wemoClass.switchON(whiteFan);
-        pixel.fill(carrot, 4, 4);
+        pixel.fill(gray, 3, 3);
         pixel.show();   
     }
     else{
-//      wemoClass.switchOFF(whiteFan); 
-        pixel.fill(white, 4, 4);
+ //     wemoClass.switchOFF(whiteFan); 
+        pixel.fill(black, 3, 3);
         pixel.show();
     }
   }
@@ -314,10 +308,14 @@ void controlHome(){
     display.printf("Alien\nTea\nWhite Fan<\nBlue Fan\n");
     display.display();
     if(teaState == true){
-//      wemoClass.switchON(tea);       
+//      wemoClass.switchON(tea);
+        pixel.fill(teal, 6, 3);
+        pixel.show();         
     }
     else{
-//      wemoClass.switchOFF(tea);  
+ //     wemoClass.switchOFF(tea);
+        pixel.fill(black, 6, 3);
+        pixel.show();    
     }
   }
   if(wemoPos == 3){
@@ -325,10 +323,14 @@ void controlHome(){
     display.printf("Alien\nTea\nWhite Fan\nBlue Fan<\n");
     display.display();
     if(blueFanState == true){
- //     wemoClass.switchON(blueFan);  
+  //       wemoClass.switchON(blueFan);
+        pixel.fill(blue, 9, 3);
+        pixel.show();    
     }
     else{
- //     wemoClass.switchOFF(blueFan);
+  //      wemoClass.switchOFF(blueFan);
+        pixel.fill(black, 9, 3);
+        pixel.show();   
     }
   }
 }
@@ -336,8 +338,7 @@ void controlHome(){
 void sleepTimer(){ 
 
     currentTime = millis();
-//    Serial.printf("Timer On: %i\n", timerOn);
-
+    
     if(timerOn == true){
     display.clearDisplay();
     display.setTextSize(4);
@@ -346,49 +347,51 @@ void sleepTimer(){
     display.printf("Alarm\n ON+");
     display.display();
       if(millis()-lastTime >= wakeTimer){
-        Serial.printf("Wake up is ready\n");
        if((currentTime-lastSecond)>500) {
-        Serial.print("Flash\n");
         HueColor = HueOrange;
         HueBright = 255;
         HueOn = true;
         setHue(hueOne, HueOn, HueColor, HueBright);
+        setHue(hueTwo, HueOn, HueColor, HueBright);
+        setHue(hueThree, HueOn, HueColor, HueBright);
+        setHue(hueFour, HueOn, HueColor, HueBright);
+        setHue(hueFive, HueOn, HueColor, HueBright);
         pixel.clear();
         pixel.fill(orange, 0, 12);
         pixel.show();
         lastSecond = millis();
        }
          if((currentTime-lastMinute)>1000) {
-          Serial.println("Ding\n");
           HueColor = HueBlue;
           HueBright = 255;
           HueOn = true;
           setHue(hueOne, HueOn, HueColor, HueBright);
+          setHue(hueTwo, HueOn, HueColor, HueBright);
+          setHue(hueThree, HueOn, HueColor, HueBright);
+          setHue(hueFour, HueOn, HueColor, HueBright);
+          setHue(hueFive, HueOn, HueColor, HueBright);
           pixel.clear();
           pixel.fill(blue, 0, 12);
           pixel.show();
           lastMinute = millis();
+          }
+       }
       }
-     }
       else{
-        Serial.printf("Not wake up\n");
+      display.clearDisplay();
+      display.setTextSize(4);
+      display.setTextColor(SSD1306_WHITE);
+      display.setCursor(0,0);
+      display.printf("Alarm\n OFF-");
+      display.display();
+      pixel.clear();
+      pixel.setBrightness(20);
+      pixel.fill(turquoise, 0, 12);
+      pixel.show();
       }
-    }
-    else{
-    display.clearDisplay();
-    display.setTextSize(4);
-    display.setTextColor(SSD1306_WHITE);
-    display.setCursor(0,0);
-    display.printf("Alarm\n OFF-");
-    display.display();
-    pixel.clear();
-    pixel.setBrightness(20);
-    pixel.fill(turquoise, 0, 12);
-    pixel.show();
-     }
 }
 
-void lightsOn(){
+void lightsOn(){ ////not used******************
       pixel.clear();
       pixel.setBrightness(brightPos);
       pixel.fill(rainbow[rainColor], 0, 2);
@@ -417,21 +420,23 @@ void doorKnock(){
       HueColor = HueRed;
       HueBright = 255;
       setHue(hueOne, HueOn, HueColor, HueBright);
+      setHue(hueTwo, HueOn, HueColor, HueBright);
+      setHue(hueThree, HueOn, HueColor, HueBright);
+      setHue(hueFour, HueOn, HueColor, HueBright);
+      setHue(hueFive, HueOn, HueColor, HueBright);     
       knockSecond = millis();
     }
     if((currentTime-knockSecond)>3000) {
       HueColor = HueBlue;
       HueBright = 255;
       setHue(hueOne, HueOn, HueColor, HueBright);
+      setHue(hueOne, HueOn, HueColor, HueBright);
+      setHue(hueTwo, HueOn, HueColor, HueBright);
+      setHue(hueThree, HueOn, HueColor, HueBright);
+      setHue(hueFour, HueOn, HueColor, HueBright);
+      setHue(hueFive, HueOn, HueColor, HueBright); 
       knockSecond = millis();
     }       
-    
-//maybe only use one hue 
-//  setHue(hueTwo, HueOn, HueColor, HueBright);
-//  setHue(hueThree, HueOn, HueColor, HueBright);
-//  setHue(hueFour, HueOn, HueColor, HueBright);
-//  setHue(hueFive, HueOn, HueColor, HueBright);
-
 }
 
 void click1() { //black button press will cycle between functions
@@ -447,10 +452,9 @@ void click1() { //black button press will cycle between functions
   else {
     lastState++;
   }
-  
 }
 
-void longPressStart1() { 
+void longPressStart1() { /////not used***********
 
 
 }
