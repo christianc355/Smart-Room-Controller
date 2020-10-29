@@ -9,12 +9,12 @@
 #include <Adafruit_BME280.h>
 #include <Adafruit_NeoPixel.h>
 #include <colors.h>
-#include <Wire.h> //not sure what this does
+#include <Wire.h>
 #include <Adafruit_GFX.h>
 #include <Adafruit_SSD1306.h>
 #include <SPI.h>
 #include <mac.h>
-#include "wemo.h" //in lesson code this was in parenthesis
+#include "wemo.h"
 #include <Encoder.h>
 #include <hue.h>
 
@@ -32,7 +32,7 @@ int encButton = 23;
 int blackButton = 22;
 int textSize = 2;
 int homeTextSize = 3;
-int micro; //microphone for door knock automation
+int micro; //MAX4466 microphone
 
 unsigned int lastTime = 0;
 unsigned int wakeTimer = 5000;
@@ -43,7 +43,7 @@ unsigned int knockSecond;
 
 bool HueOn;
 int HueColor;
-int HueBright = 255; //declared immediatly to set initial brightness to 255
+int HueBright = 255;
 int brightPos; //mapped to encPos to control brightness of hue
 int encPos; //posistion of encoder
 int wemoPos; //posistion of Wemo switch mapped to encoder
@@ -53,10 +53,8 @@ int hueTwo = 2;
 int hueThree = 3; 
 int hueFour = 4;
 int hueFive = 5;
-int rainColor; //chooses color of rainbow from hue color array
+int rainColor; //chooses color of rainbow from color array
 bool encRead;
-
-//maybe modify hue.h to add white to rainbow array*******
 
 int homeState; //will cycle between functions of controller
 int lastState; //will save homeState position
@@ -68,7 +66,7 @@ float tempRange;
 int neoRange;
 int displayBright;
 
-const int alien = 0; //numbers relate to wemo outlets
+const int alien = 0; //following numbers relate to wemo outlets
 const int whiteFan = 1;
 const int tea = 2;
 const int blueFan = 3;
@@ -77,12 +75,12 @@ bool buttonState;
 bool timerState; //state to determine whether timer should be on or off
 bool timerOn;
 
-bool alienState; //will switch states of different wemo outlets between true and false
+bool alienState; //following will switch states of different wemo outlets between true and false
 bool whiteFanState;
 bool teaState;
 bool blueFanState;
 
-OneButton button1(blackButton, false, false); //may need to change false true since button code is borrowed from encoder lesson****
+OneButton button1(blackButton, false, false);
 OneButton button2(encButton, false, false);
 Adafruit_BME280 bme;
 Adafruit_NeoPixel pixel(14, 17, NEO_GRB + NEO_KHZ800);
@@ -111,7 +109,7 @@ button2.attachLongPressStart(longPressStart2);
 button2.setClickTicks(250);
 button2.setPressTicks(500);
 
-pinMode (17, OUTPUT); //is this needed?
+pinMode (17, OUTPUT);
 pinMode (A7, INPUT); //microphone
 
 pixel.begin();
@@ -120,7 +118,7 @@ pixel.setBrightness(68);
 
 display.begin(SSD1306_SWITCHCAPVCC, 0x3C);
 display.display();
-delay(2000); //why delay?
+delay(2000);
 display.clearDisplay();
 display.display();
 
@@ -130,8 +128,6 @@ void loop() {
 
   button1.tick();
   button2.tick();
-
-  digitalWrite(6,LOW);//maybe delete*********goes to encoder light 
 
   if(homeState == envRead) {
      readEnvironment();
@@ -161,12 +157,7 @@ void loop() {
     lastSecond = millis();
     }
   }
-
   encRead = digitalRead(23);
-
-//  Serial.printf("Temperature: %.2f°F, Pressure: %.2f inHG, Humidity: %.2f Percent\n", temp, pressure, humidity);
-//  Serial.printf("Home State: %i Encoder: %i ButtonState: %i rainColor: %i micro: %i\n", homeState, encPos, buttonState, rainColor, micro);
-//  Serial.printf("Wemo Position: %i, Alien: %i, White Fan; %i, Tea: %i, Blue Fan: %i\n", wemoPos, alienState, whiteFanState, teaState, blueFanState);
 }
 
 
@@ -188,7 +179,6 @@ void readEnvironment(){      //could add functionality to turn lights on and off
     display.setTextSize(textSize);
     display.setTextColor(SSD1306_WHITE);
     display.setCursor(0,0);
-//    display.printf("Temperature: %.2f %cF\n Pressure: %.2f inHG\n Humidity: %.2f%c\n", temp, (char)247, pressure, humidity, (char)37);
     display.printf("%.2f %cF\n%.2f inHG\n%.2f%c\n", temp, (char)247, pressure, humidity, (char)37);    
     display.display();
 }
@@ -211,7 +201,7 @@ void controlLights(){
         brightPos = 20; //will prevent neoPixels from shutting off completely when hue bulb at lowest brightness
       }
       pixel.clear();
-      pixel.setBrightness(brightPos);//pixel will possibly show same brightness as hue bulb***
+      pixel.setBrightness(brightPos);
       pixel.fill(rainbow[rainColor], 0, 12);
       pixel.show();
       }
@@ -238,7 +228,7 @@ void controlLights(){
 
     displayBright = map(HueBright, 0, 255, 0, 100); //will display brightness as a percentage on display
 
-    display.setTextSize(2); //maybe increase text size****
+    display.setTextSize(2);
     display.setTextColor(SSD1306_WHITE);
     display.setCursor(0,0);
     if(buttonState == true){
