@@ -147,7 +147,7 @@ void loop() {
   }
   if(homeState == knockState){
     doorKnock();
-    delay(4000);
+//    delay(9000);
     homeState = lastState;
   }
 
@@ -198,11 +198,11 @@ void controlLights(){
     HueOn = buttonState;
     HueColor = HueRainbow[rainColor];
     HueBright = brightPos;
-//    setHue(hueOne, HueOn, HueColor, HueBright);//may need to adjust lightNum array or add several setHue
-//    setHue(hueTwo, HueOn, HueColor, HueBright);
-//    setHue(hueThree, HueOn, HueColor, HueBright);
-//    setHue(hueFour, HueOn, HueColor, HueBright);
-//    setHue(hueFive, HueOn, HueColor, HueBright);
+    setHue(hueOne, HueOn, HueColor, HueBright);//may need to adjust lightNum arr
+    setHue(hueTwo, HueOn, HueColor, HueBright);
+    setHue(hueThree, HueOn, HueColor, HueBright);
+    setHue(hueFour, HueOn, HueColor, HueBright);
+    setHue(hueFive, HueOn, HueColor, HueBright);
     
     if(buttonState == true){//neoPixel will show same color as hue bulb without delay
       if(brightPos < 20){
@@ -243,12 +243,13 @@ void controlHome(){
   }
 
   myEnc.write(encPos);
-  neoPos = map(encPos, 0, 95, 0, 13);//map neopixel to encoder
+  neoPos = map(encPos, 0, 95, 0, 11);//map neopixel to encoder
   wemoPos = map(encPos, 0, 95, 0, 3);//map wemo number to encoder
 
-//  pixel.clear();
+  pixel.clear();
   pixel.setPixelColor(neoPos, blue);
   pixel.show();
+
   
   display.clearDisplay();
   display.setTextSize(homeTextSize); //maybe increase text size****
@@ -260,50 +261,33 @@ void controlHome(){
   if(wemoPos == 0){ //all these if statements added to be able to individually control each wemo individually without interupting the fuction of others
     if(alienState == true){
 //      wemoClass.switchON(alien);
-      pixel.fill(turquoise, 0, 3); //neopixels will give visual indication of wemo selection and whether it is true
-      pixel.show();
     }
     else{
-//      wemoClass.switchOFF(alien);
-      pixel.fill(navy, 0, 3);
-//      pixel.setPixelColor(neoPos, blue);
-      pixel.show();      
+//      wemoClass.switchOFF(alien); 
     }
   }
   if(wemoPos == 1){
     if(whiteFanState == true){
- //     wemoClass.switchON(whiteFan);
-      pixel.fill(indigo, 3, 3);
-      pixel.show();      
+ //     wemoClass.switchON(whiteFan);   
     }
     else{
-//      wemoClass.switchOFF(whiteFan);
-      pixel.fill(silver, 3, 3);
-      pixel.show();  
+//      wemoClass.switchOFF(whiteFan); 
     }
   }
   if(wemoPos == 2){
     if(teaState == true){
-//      wemoClass.switchON(tea);
-      pixel.fill(orange, 6, 3);
-      pixel.show();       
+//      wemoClass.switchON(tea);       
     }
     else{
-//      wemoClass.switchOFF(tea);
-      pixel.fill(black, 6, 3);
-      pixel.show();  
+//      wemoClass.switchOFF(tea);  
     }
   }
   if(wemoPos == 3){
     if(blueFanState == true){
- //     wemoClass.switchON(blueFan);
-      pixel.fill(red, 9, 3);
-      pixel.show();  
+ //     wemoClass.switchON(blueFan);  
     }
     else{
  //     wemoClass.switchOFF(blueFan);
-      pixel.fill(turquoise, 9, 3);
-      pixel.show();  
     }
   }
 }
@@ -332,10 +316,18 @@ void doorKnock(){
   
     pixel.clear();
     pixel.fill(red, 0, 12);
-    delay(500);
     pixel.fill(white, 0, 12);
     pixel.show();
-
+        
+    HueOn = true; //paramaters set here for door knock function
+    HueColor = HueRed;
+    HueBright = 255;
+  setHue(hueOne, HueOn, HueColor, HueBright);//maybe only use hue 
+//  setHue(hueTwo, HueOn, HueColor, HueBright);
+//  setHue(hueThree, HueOn, HueColor, HueBright);
+  setHue(hueFour, HueOn, HueColor, HueBright);
+//  setHue(hueFive, HueOn, HueColor, HueBright);
+  delay(10000);
   
 }
 
