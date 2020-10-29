@@ -34,6 +34,9 @@ int textSize = 2;
 int homeTextSize = 3;
 int micro; //microphone for door knock automation
 
+unsigned int lastTime = 0;
+unsigned int wakeTimer = 5000;
+
 bool HueOn;
 int HueColor;
 int HueBright = 255; //declared immediatly to set initial brightness to 255
@@ -66,6 +69,8 @@ const int tea = 2;
 const int blueFan = 3;
 
 bool buttonState; 
+bool timerState; //state to determine whether timer should be on or off
+bool timerOn;
 
 bool alienState; //will switch states of different wemo outlets between true and false
 bool whiteFanState;
@@ -81,13 +86,13 @@ Encoder myEnc(2,3);
 
 //wemo wemoClass;
 
-EthernetClient client;
+//EthernetClient client;
 
 void setup() {
   
 Serial.begin(9600);
   
-Ethernet.begin(mac);
+//Ethernet.begin(mac);
 
 bme.begin(0x76);
 
@@ -292,8 +297,29 @@ void controlHome(){
   }
 }
 
-void sleepTimer(){
-  //will use timer to slowly turn on and brigthen lights followed by red flashes to act as a wake up alarm. When encoder button is pressed lights and teapot will turn on. 
+void sleepTimer(){ 
+   
+    display.clearDisplay();
+    display.setTextSize(homeTextSize); //maybe increase text size****
+    display.setTextColor(SSD1306_WHITE);
+    display.setCursor(0,0);
+    display.printf("Wake Up\nAlarm");
+    display.display();
+
+    if(timerOn == true){
+      if(millis()-lastTime >= wakeTimer){
+        Serial.printf("Wake up is ready\n");
+      }
+      else{
+        Serial.printf("Not wake up\n");
+      }
+    }
+    else{
+      
+    }
+  Serial.printf("TimerOn: %i",timerOn);
+
+  
 }
 
 void lightsOn(){
@@ -399,6 +425,16 @@ void click2() { //encoder button will cycle different states depeding on homeSta
        blueFanState = true;
      }
     } 
+  }
+
+  if(homeState == autoWind){
+    if(timerOn == true) { 
+      timerOn = false;
+    }
+    else {
+      timerOn = true;
+      lastTime = millis();
+    }
   }
 }
   
