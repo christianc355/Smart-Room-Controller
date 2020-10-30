@@ -16,7 +16,7 @@
 #include <mac.h>
 #include "wemo.h"
 #include <Encoder.h>
-#include <hue.h>
+#include <hue2.h>
 
 #define SCREEN_WIDTH 128
 #define SCREEN_HEIGHT 64
@@ -26,7 +26,9 @@ int envRead = 0;
 int lightControl = 1;
 int homeControl = 2;
 int autoWind = 3;
-int knockState = 4;
+int lightsOn = 4;
+int knockState = 5;
+
 
 int encButton = 23;
 int blackButton = 22;
@@ -42,6 +44,7 @@ unsigned int lastMinute;
 unsigned int knockSecond;
 
 bool HueOn;
+bool HueSat;
 int HueColor;
 int HueBright = 255;
 int brightPos; //mapped to encPos to control brightness of hue
@@ -72,6 +75,7 @@ const int tea = 2;
 const int blueFan = 3;
 
 bool buttonState; 
+bool lightState;
 bool timerState; //state to determine whether timer should be on or off
 bool timerOn;
 
@@ -89,13 +93,13 @@ Encoder myEnc(2,3);
 
 wemo wemoClass;
 
-//EthernetClient client;
+EthernetClient client;
 
 void setup() {
   
 Serial.begin(9600);
   
-//Ethernet.begin(mac);
+Ethernet.begin(mac);
 
 bme.begin(0x76);
 
@@ -145,10 +149,14 @@ void loop() {
     sleepTimer();
   }
 
+  if(homeState == lightsOn){
+    whiteLights();
+  }
+
   micro = analogRead(A7);
   currentTime = millis();
   if(micro > 1000){
-    homeState = 4;
+    homeState = 5;
   }
   if(homeState == knockState){
     doorKnock();
@@ -220,11 +228,11 @@ void controlLights(){
     HueOn = buttonState;
     HueColor = HueRainbow[rainColor];
     HueBright = brightPos;
-    setHue(hueOne, HueOn, HueColor, HueBright);//may need to adjust lightNum arr
-    setHue(hueTwo, HueOn, HueColor, HueBright);
-    setHue(hueThree, HueOn, HueColor, HueBright);
-    setHue(hueFour, HueOn, HueColor, HueBright);
-    setHue(hueFive, HueOn, HueColor, HueBright);
+    setHue(hueOne, HueOn, HueColor, HueBright, 255);//may need to adjust lightNum arr
+    setHue(hueTwo, HueOn, HueColor, HueBright, 255);
+    setHue(hueThree, HueOn, HueColor, HueBright, 255);
+    setHue(hueFour, HueOn, HueColor, HueBright, 255);
+    setHue(hueFive, HueOn, HueColor, HueBright, 255);
 
     displayBright = map(HueBright, 0, 255, 0, 100); //will display brightness as a percentage on display
 
@@ -233,12 +241,12 @@ void controlLights(){
     display.setCursor(0,0);
     if(buttonState == true){
     display.clearDisplay();
-    display.printf(" -Lights-\nLumen:%i%c\nHue: ON", displayBright,(char)37);
+    display.printf(" Hue Light\nLumen:%i%c\nHue: ON", displayBright,(char)37);
     display.display();      
     }
     else{
     display.clearDisplay();
-    display.printf(" -Lights-\nLumen:%i%c\nHue: OFF", displayBright,(char)37);
+    display.printf("Hue Light\nLumen:%i%c\nHue: OFF", displayBright,(char)37);
     display.display();
     }
 }
@@ -265,60 +273,60 @@ void controlHome(){
 
   if(wemoPos == 0){ //all these if statements added to be able to individually control each wemo individually without interupting the fuction of others
     display.clearDisplay();
-    display.printf("Alien<\nTea\nWhite Fan\nBlue Fan\n");
+    display.printf("Alien<\nWhite Fan\nTea\nBlue Fan\n");
     display.display();
     if(alienState == true){
- //     wemoClass.switchON(alien);
+         wemoClass.switchON(alien);
         pixel.fill(green, 0, 3);
         pixel.show();
     }
     else{
-  //    wemoClass.switchOFF(alien);
+        wemoClass.switchOFF(alien);
         pixel.fill(black, 0, 3);
         pixel.show();
     }
   }
   if(wemoPos == 1){
     display.clearDisplay();
-    display.printf("Alien\nTea<\nWhite Fan\nBlue Fan\n");
+    display.printf("Alien\nWhite Fan<\nTea\nBlue Fan\n");
     display.display();
     if(whiteFanState == true){
- //     wemoClass.switchON(whiteFan);
+        wemoClass.switchON(whiteFan);
         pixel.fill(gray, 3, 3);
         pixel.show();   
     }
     else{
- //     wemoClass.switchOFF(whiteFan); 
+        wemoClass.switchOFF(whiteFan); 
         pixel.fill(black, 3, 3);
         pixel.show();
     }
   }
   if(wemoPos == 2){
     display.clearDisplay();
-    display.printf("Alien\nTea\nWhite Fan<\nBlue Fan\n");
+    display.printf("Alien\nWhite Fan\nTea<\nBlue Fan\n");
     display.display();
     if(teaState == true){
-//      wemoClass.switchON(tea);
+        wemoClass.switchON(tea);
         pixel.fill(teal, 6, 3);
         pixel.show();         
     }
     else{
- //     wemoClass.switchOFF(tea);
+        wemoClass.switchOFF(tea);
         pixel.fill(black, 6, 3);
         pixel.show();    
     }
   }
   if(wemoPos == 3){
     display.clearDisplay();
-    display.printf("Alien\nTea\nWhite Fan\nBlue Fan<\n");
+    display.printf("Alien\nWhite Fan\nTea\nBlue Fan<\n");
     display.display();
     if(blueFanState == true){
-  //       wemoClass.switchON(blueFan);
+        wemoClass.switchON(blueFan);
         pixel.fill(blue, 9, 3);
         pixel.show();    
     }
     else{
-  //      wemoClass.switchOFF(blueFan);
+        wemoClass.switchOFF(blueFan);
         pixel.fill(black, 9, 3);
         pixel.show();   
     }
@@ -341,11 +349,11 @@ void sleepTimer(){
         HueColor = HueOrange;
         HueBright = 255;
         HueOn = true;
-        setHue(hueOne, HueOn, HueColor, HueBright);
-        setHue(hueTwo, HueOn, HueColor, HueBright);
-        setHue(hueThree, HueOn, HueColor, HueBright);
-        setHue(hueFour, HueOn, HueColor, HueBright);
-        setHue(hueFive, HueOn, HueColor, HueBright);
+        setHue(hueOne, HueOn, HueColor, HueBright, 255);
+        setHue(hueTwo, HueOn, HueColor, HueBright, 255);
+        setHue(hueThree, HueOn, HueColor, HueBright, 255);
+        setHue(hueFour, HueOn, HueColor, HueBright, 255);
+        setHue(hueFive, HueOn, HueColor, HueBright, 255);
         pixel.clear();
         pixel.fill(orange, 0, 12);
         pixel.show();
@@ -355,11 +363,11 @@ void sleepTimer(){
           HueColor = HueBlue;
           HueBright = 255;
           HueOn = true;
-          setHue(hueOne, HueOn, HueColor, HueBright);
-          setHue(hueTwo, HueOn, HueColor, HueBright);
-          setHue(hueThree, HueOn, HueColor, HueBright);
-          setHue(hueFour, HueOn, HueColor, HueBright);
-          setHue(hueFive, HueOn, HueColor, HueBright);
+          setHue(hueOne, HueOn, HueColor, HueBright, 255);
+          setHue(hueTwo, HueOn, HueColor, HueBright, 255);
+          setHue(hueThree, HueOn, HueColor, HueBright, 255);
+          setHue(hueFour, HueOn, HueColor, HueBright, 255);
+          setHue(hueFive, HueOn, HueColor, HueBright, 255);
           pixel.clear();
           pixel.fill(blue, 0, 12);
           pixel.show();
@@ -381,14 +389,68 @@ void sleepTimer(){
       }
 }
 
-void lightsOn(){ ////not used******************
+void whiteLights(){
+  encPos = myEnc.read();
+    if(encPos > 95){
+      encPos = 95;
+    }
+    if(encPos < 0){
+      encPos = 0;
+    }
+    
+    myEnc.write(encPos);
+    brightPos = map(encPos, 0, 95, 0, 255);
+    
+    if(buttonState == true){//neoPixel will show same color as hue bulb without delay
+      if(brightPos < 20){
+        brightPos = 20; //will prevent neoPixels from shutting off completely when hue bulb at lowest brightness
+      }
       pixel.clear();
       pixel.setBrightness(brightPos);
-      pixel.fill(rainbow[rainColor], 0, 2);
-      pixel.fill(rainbow[rainColor], 4, 2);
-      pixel.fill(rainbow[rainColor], 8, 2);
+      pixel.fill(white, 0, 12);
       pixel.show();
+      }
+      else {
+        if(brightPos < 20){
+          brightPos = 20;
+        }
+      pixel.clear();
+      pixel.setBrightness(brightPos);
+      pixel.clear();
+      pixel.setBrightness(brightPos);
+      pixel.fill(white, 0, 2);
+      pixel.fill(white, 4, 2);
+      pixel.fill(white, 8, 2);
+      pixel.show();
+      pixel.show();
+      } 
+    
+    HueOn = buttonState;
+    HueColor = HueRainbow[rainColor];
+    HueBright = brightPos;
+    setHue(hueOne, HueOn, HueColor, HueBright, 0);
+    setHue(hueTwo, HueOn, HueColor, HueBright, 0);
+    setHue(hueThree, HueOn, HueColor, HueBright, 0);
+    setHue(hueFour, HueOn, HueColor, HueBright, 0);
+    setHue(hueFive, HueOn, HueColor, HueBright, 0);
+
+    displayBright = map(HueBright, 0, 255, 0, 100); //will display brightness as a percentage on display
+
+    display.setTextSize(2);
+    display.setTextColor(SSD1306_WHITE);
+    display.setCursor(0,0);
+    if(buttonState == true){
+    display.clearDisplay();
+    display.printf(" -Lights-\nLumen:%i%c\nHue: ON", displayBright,(char)37);
+    display.display();      
+    }
+    else{
+    display.clearDisplay();
+    display.printf(" -Lights-\nLumen:%i%c\nHue: OFF", displayBright,(char)37);
+    display.display();
+    }
 }
+
 
 void doorKnock(){
 
@@ -409,34 +471,34 @@ void doorKnock(){
     if((currentTime-knockSecond)>1000) {
       HueColor = HueRed;
       HueBright = 255;
-      setHue(hueOne, HueOn, HueColor, HueBright);
-      setHue(hueTwo, HueOn, HueColor, HueBright);
-      setHue(hueThree, HueOn, HueColor, HueBright);
-      setHue(hueFour, HueOn, HueColor, HueBright);
-      setHue(hueFive, HueOn, HueColor, HueBright);     
+      setHue(hueOne, HueOn, HueColor, HueBright, 255);
+      setHue(hueTwo, HueOn, HueColor, HueBright, 255);
+      setHue(hueThree, HueOn, HueColor, HueBright, 255);
+      setHue(hueFour, HueOn, HueColor, HueBright, 255);
+      setHue(hueFive, HueOn, HueColor, HueBright, 255);     
       knockSecond = millis();
     }
     if((currentTime-knockSecond)>3000) {
       HueColor = HueBlue;
       HueBright = 255;
-      setHue(hueOne, HueOn, HueColor, HueBright);
-      setHue(hueOne, HueOn, HueColor, HueBright);
-      setHue(hueTwo, HueOn, HueColor, HueBright);
-      setHue(hueThree, HueOn, HueColor, HueBright);
-      setHue(hueFour, HueOn, HueColor, HueBright);
-      setHue(hueFive, HueOn, HueColor, HueBright); 
+      setHue(hueOne, HueOn, HueColor, HueBright, 255);
+      setHue(hueOne, HueOn, HueColor, HueBright, 255);
+      setHue(hueTwo, HueOn, HueColor, HueBright, 255);
+      setHue(hueThree, HueOn, HueColor, HueBright, 255);
+      setHue(hueFour, HueOn, HueColor, HueBright, 255);
+      setHue(hueFive, HueOn, HueColor, HueBright, 255); 
       knockSecond = millis();
     }       
 }
 
 void click1() { //black button press will cycle between functions
-  if(homeState >= 3){
+  if(homeState >= 4){
     homeState = 0;
   }
   else {
     homeState++;
   }
-  if(lastState >= 3){
+  if(lastState >= 4){
     lastState = 0;
   }
   else {
@@ -445,7 +507,12 @@ void click1() { //black button press will cycle between functions
 }
 
 void longPressStart1() { /////not used***********
-
+    if(lightState == true) { 
+      lightState = false;
+    }
+    else {
+      lightState = true;
+    }
 
 }
 
@@ -457,7 +524,16 @@ void click2() { //encoder button will cycle different states depeding on homeSta
     }
     else {
       buttonState = true;
-    } //maybe this button state can turn on or off extra LEDs
+    }
+  }
+
+  if(homeState == lightsOn) { //controls what encoder button will do if within lightControl funcionality
+    if(buttonState == true) { 
+      buttonState = false;
+    }
+    else {
+      buttonState = true;
+    }
   }
 
   if(homeState == homeControl){ //controls what button will do within homeControl
